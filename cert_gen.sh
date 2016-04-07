@@ -26,7 +26,7 @@ fi
 #
 # 1 = keep existing one
 # 2 = re-generate
-/opt/letsencrypt/letsencrypt-auto certonly --standalone -d $DOMAIN -d www.$DOMAIN --text 1>/dev/null <<-EOF
+/opt/letsencrypt/letsencrypt-auto certonly --standalone -d $DOMAIN -d www.$DOMAIN $ADDITIONAL_DOMAINS --text 1>/dev/null <<-EOF
 2
 EOF
 
