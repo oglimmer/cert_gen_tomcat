@@ -9,17 +9,22 @@ source /etc/cert_gen_tomcat
 BINARY_BOUND_HTTP=$(ps --no-headers -fp $(lsof -t -i :80)|awk '{print $8}')
 if [[ "$BINARY_BOUND_HTTP" =~ haproxy ]]; then
 	service haproxy stop 1>/dev/null
-else
-	if [ -d "/opt/apache-tomcat" ]; then	
-		/opt/apache-tomcat/bin/shutdown.sh 1>/dev/null
-	else 
-		service tomcat7 stop 1>/dev/null
-	fi
+fi
+
+if [ -d "/opt/apache-tomcat" ]; then	
+	/opt/apache-tomcat/bin/shutdown.sh 1>/dev/null
+else 
+	service tomcat7 stop 1>/dev/null
 fi
 
 #
-# Stop if HTTP is already bound (as letsencrypt will start a webserver)
+# Stop if HTTP/HTTPS is already bound (as letsencrypt will start a webserver)
 #
+netstat -at|grep -q "https.*LISTEN"
+if [ $? -eq 0  ]; then
+	echo "Port 443 still bound. Exit."
+	exit 1
+fi
 netstat -atn|grep  ":80 .*LISTEN"
 if [ $? -eq 0  ]; then
 	echo "Port 80 still bound. Exit."
@@ -87,12 +92,13 @@ fi
 
 if [[ "$BINARY_BOUND_HTTP" =~ haproxy ]]; then
 	service haproxy start 1>/dev/null
-else
-	if [ -d "/opt/apache-tomcat" ]; then	
-		/opt/apache-tomcat/bin/startup.sh 1>/dev/null
-	else 
-		service tomcat7 start 1>/dev/null
-	fi
 fi
+
+if [ -d "/opt/apache-tomcat" ]; then	
+	/opt/apache-tomcat/bin/startup.sh 1>/dev/null
+else 
+	service tomcat7 start 1>/dev/null
+fi
+
 
 exit $EXIT_CODE
