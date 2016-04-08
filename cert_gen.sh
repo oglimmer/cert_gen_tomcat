@@ -36,7 +36,8 @@ fi
 #
 # 1 = keep existing one
 # 2 = re-generate
-/opt/letsencrypt/letsencrypt-auto certonly --standalone -d $DOMAIN -d www.$DOMAIN $ADDITIONAL_DOMAINS --text 1>/dev/null <<-EOF
+/opt/letsencrypt/letsencrypt-auto certonly --standalone -d $DOMAIN -d www.$DOMAIN $ADDITIONAL_DOMAINS \
+	--text 1>/dev/null <<-EOF
 2
 EOF
 
@@ -48,7 +49,9 @@ fi
 #
 # convert PEM to p12
 #
-openssl pkcs12 -export -in /etc/letsencrypt/live/$DOMAIN/fullchain.pem -inkey /etc/letsencrypt/live/$DOMAIN/privkey.pem -passout pass:$PASS > /etc/letsencrypt/live/$DOMAIN/server.p12
+openssl pkcs12 -export -in /etc/letsencrypt/live/$DOMAIN/fullchain.pem \
+	-inkey /etc/letsencrypt/live/$DOMAIN/privkey.pem \
+	-passout pass:$PASS > /etc/letsencrypt/live/$DOMAIN/server.p12
 
 if [ $? -ne 0  ]; then
         echo "openssl key conversion to pkcs12 failed. Exit."
@@ -60,7 +63,8 @@ rm -f /etc/tomcat7/keystore-$DOMAIN-new 2>/dev/null
 #
 # create a new keystore file
 #
-keytool -importkeystore -srckeystore /etc/letsencrypt/live/$DOMAIN/server.p12 -destkeystore /etc/tomcat7/keystore-$DOMAIN-new -srcstoretype pkcs12 2>/dev/null <<-EOF
+keytool -importkeystore -srckeystore /etc/letsencrypt/live/$DOMAIN/server.p12 \
+	-destkeystore /etc/tomcat7/keystore-$DOMAIN-new -srcstoretype pkcs12 2>/dev/null <<-EOF
 $PASS
 $PASS
 $PASS
@@ -78,7 +82,8 @@ if [ $? -eq 0  ]; then
 	# postfix might also use the certificate
 	#
 	if [ -f "/etc/postfix/server.pem" ]; then
-		cat /etc/letsencrypt/live/$DOMAIN/fullchain.pem /etc/letsencrypt/live/$DOMAIN/root.pem >/etc/postfix/server.pem
+		cat /etc/letsencrypt/live/$DOMAIN/fullchain.pem \
+			/etc/letsencrypt/live/$DOMAIN/root.pem >/etc/postfix/server.pem
 		cat /etc/letsencrypt/live/$DOMAIN/privkey.pem >/etc/postfix/privkey.pem
 
 		service postfix restart 1>/dev/null
