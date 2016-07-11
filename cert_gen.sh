@@ -8,7 +8,7 @@ source /etc/cert_gen_tomcat
 
 if [ ! -f /usr/local/bin/certbot-auto ]; then
 	wget -q https://dl.eff.org/certbot-auto >/usr/local/bin/certbot-auto
-	chmod a+x certbot-auto
+	chmod a+x /usr/local/bin/certbot-auto
 fi
 
 pgrep haproxy 1>/dev/null
