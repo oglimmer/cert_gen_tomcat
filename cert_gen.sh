@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 if [ ! -f "/etc/cert_gen_tomcat" ]; then
 	echo "Config file /etc/cert_gen_tomcat does not exist"
@@ -6,8 +6,14 @@ if [ ! -f "/etc/cert_gen_tomcat" ]; then
 fi
 source /etc/cert_gen_tomcat
 
-BINARY_BOUND_HTTP=$(ps --no-headers -fp $(lsof -t -i :80)|awk '{print $8}')
-if [[ "$BINARY_BOUND_HTTP" =~ haproxy ]]; then
+if [ ! -f /usr/local/bin/certbot-auto ]; then
+	wget -q https://dl.eff.org/certbot-auto
+	chmod a+x certbot-auto
+fi
+
+pgrep haproxy 1>/dev/null
+HAPROXY=$?
+if [ "$HAPROXY" -eq 0 ]; then
 	service haproxy stop 1>/dev/null
 fi
 
@@ -34,12 +40,7 @@ fi
 #
 # letsencrypt will re-generate the certs
 #
-# 1 = keep existing one
-# 2 = re-generate
-/opt/letsencrypt/letsencrypt-auto certonly --standalone -d $DOMAIN -d www.$DOMAIN $ADDITIONAL_DOMAINS \
-	--text 1>/dev/null <<-EOF
-2
-EOF
+/usr/local/bin/certbot-auto renew 1>/dev/null
 
 if [ $? -ne 0  ]; then
         echo "letsencrypt failed. Exit."
@@ -95,7 +96,7 @@ else
 	EXIT_CODE=4
 fi
 
-if [[ "$BINARY_BOUND_HTTP" =~ haproxy ]]; then
+if [ "$HAPROXY" -eq 0 ]; then
 	service haproxy start 1>/dev/null
 fi
 
