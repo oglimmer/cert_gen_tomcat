@@ -7,7 +7,7 @@ fi
 source /etc/cert_gen_tomcat
 
 if [ ! -f /usr/local/bin/certbot-auto ]; then
-	wget -q https://dl.eff.org/certbot-auto >/usr/local/bin/certbot-auto
+	wget -O /usr/local/bin/certbot-auto -q https://dl.eff.org/certbot-auto
 	chmod a+x /usr/local/bin/certbot-auto
 fi
 
